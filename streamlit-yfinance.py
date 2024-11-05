@@ -6,7 +6,6 @@ import plotly.graph_objects as go
 from PIL import Image
 import os
 import base64
-import seaborn as sns
 
 
 # Set page configuration
