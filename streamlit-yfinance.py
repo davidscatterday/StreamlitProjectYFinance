@@ -5,7 +5,7 @@ import yfinance as yf
 import plotly.graph_objects as go
 from PIL import Image
 import os
-import base64
+
 
 
 # Set page configuration
@@ -56,7 +56,7 @@ DB_PATH = "/Users/davidscatterday/Documents/python projects/NYC/nycprocurement.d
 def get_sector_data(sector):
     conn = sqlite3.connect(DB_PATH)
     query = """
-    SELECT Sector, Harm_Magnitude, Population_Impact, Directional_Movement, Total_Score
+    SELECT Sector, Description, Primary_Subsector, Subsector_Weight, Harm_Magnitude, Population_Impact, Directional_Movement, Total_Score
     FROM stockracialharm
     WHERE Sector LIKE ?
     """
@@ -186,17 +186,32 @@ if submit_button:
             results = get_sector_data(sector_search)
             
             if not results.empty:
-                # Display only the detailed scores, not the full table
-                for index, row in results.iterrows():
-                    st.subheader(f"Details for {row['Sector']}:")
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.metric("Harm Magnitude", row['Harm_Magnitude'])
-                        st.metric("Population Impact", row['Population_Impact'])
-                    with col2:
-                        st.metric("Directional Movement", row['Directional_Movement'])
-                        st.metric("Total Score", row['Total_Score'])
-            else:
-                st.warning("No results found for the given sector.")
-else:
-    st.info("Please enter a stock ticker and select a sector, then click 'Submit Query'.")
+              # Display only the detailed scores, not the full table
+                    for index, row in results.iterrows():
+                        st.markdown(f"Details for {row['Sector']}:")
+        
+        # Display Description
+        st.markdown(f"**Description:** {row['Description']}")
+        
+        # Display Primary Subsector and Subsector Weight
+        st.markdown(f"**Primary Subsector:** {row['Primary_Subsector']}")
+        st.markdown(f"**Subsector Weight:** {row['Subsector_Weight']}")
+
+        # Display metrics in columns
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(f"<h3 style='text-align: center;'>Harm Magnitude</h3>", unsafe_allow_html=True)
+            st.markdown(f"<p style='font-size: 24px; font-weight: bold; text-align: center;'>{row['Harm_Magnitude']}</p>", unsafe_allow_html=True)
+        
+            st.markdown(f"<h3 style='text-align: center;'>Population Impact</h3>", unsafe_allow_html=True)
+            st.markdown(f"<p style='font-size: 24px; font-weight: bold; text-align: center;'>{row['Population_Impact']}</p>", unsafe_allow_html=True)
+
+        with col2:
+            st.markdown(f"<h3 style='text-align: center;'>Directional Movement</h3>", unsafe_allow_html=True)
+            st.markdown(f"<p style='font-size: 24px; font-weight: bold; text-align: center;'>{row['Directional_Movement']}</p>", unsafe_allow_html=True)
+        
+            st.markdown(f"<h3 style='text-align: center;'>Total Score</h3>", unsafe_allow_html=True)
+            st.markdown(f"<p style='font-size: 24px; font-weight: bold; text-align: center;'>{row['Total_Score']}</p>", unsafe_allow_html=True)
+            
+
+            
