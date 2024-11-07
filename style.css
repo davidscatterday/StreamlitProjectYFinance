@@ -1,0 +1,37 @@
+/* style.css */
+
+/* Custom styles for Streamlit app */
+
+.stApp {
+    background-color: #f0f0f0;
+    font-family: 'Lato', sans-serif;
+}
+
+.stButton > button {
+    background-color: #c1c1c1;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.stTextInput > div > div > input {
+    background-color: #f8f8f8;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 8px;
+}
+
+.stHeader {
+    background-color: #333;
+    color: white;
+    padding: 20px;
+}
+
+/* Add more custom styles as needed */
