@@ -119,6 +119,10 @@ with st.sidebar:
 st.markdown("<h2 style='font-size: 32px;'>Racial Justice Investment Intelligence Dashboard</h2>", unsafe_allow_html=True)
 st.divider()
 
+# Add this new block to display the message when no search has been performed
+if not submit_button:
+    st.info("Please enter search values in the left sidebar to begin.")
+
 if submit_button:
     if not ticker or not sector_search:
         st.error("Please provide both a stock ticker and select a sector to search.")
