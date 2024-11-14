@@ -57,7 +57,7 @@ DB_PATH = "/Users/davidscatterday/Documents/python projects/NYC/nycprocurement.d
 def get_sector_data(sector):
     conn = sqlite3.connect(DB_PATH)
     query = """
-    SELECT Sector, Description, Primary_Subsector, Subsector_Weight, Harm_Magnitude, Population_Impact, Directional_Movement, Total_Score
+    SELECT Sector, Description, Primary_Subsector, Subsector_Weight, Harm_Magnitude, Population_Impact, Directional_Movement, Total_Score, Normalized_Score_1, Normalized_Score_2
     FROM stockracialharm
     WHERE Sector LIKE ?
     """
@@ -87,6 +87,18 @@ def get_response(keyword1, keyword2):
     df = pd.read_sql_query(query, conn, params=(keyword1, keyword2))
     conn.close()
     return df['Response'].iloc[0] if not df.empty else "No matching response found."
+
+def get_asyousow_data(sector):
+    conn = sqlite3.connect(DB_PATH)
+    query = """
+    SELECT a.*
+    FROM asyousowrj a
+    JOIN stockracialharm s ON a.Sector = s.Sector
+    WHERE s.Sector LIKE ?
+    """
+    df = pd.read_sql_query(query, conn, params=(f"%{sector}%",))
+    conn.close()
+    return df
 
 # Format market cap and enterprise value
 def format_value(value):
@@ -243,7 +255,6 @@ if submit_button:
             st.exception(f"An error occurred while fetching stock data: {e}")
 
         st.divider()
-
         # Stock Racial Harm Data
         st.subheader("Industry Sector Racial Harm Metrics")
         with st.spinner('Fetching sector data...'):
@@ -254,18 +265,87 @@ if submit_button:
                     st.markdown(f"**Description:** {row['Description']}")
                     st.markdown(f"**Primary Subsector:** {row['Primary_Subsector']}")
                     st.markdown(f"**Subsector Weight:** {row['Subsector_Weight']}")
+
+                   
+                    st.markdown(f"<h3 style='text-align: center;'>Harm Magnitude</h3>", unsafe_allow_html=True)
+
+                    # Function to get Harm-Magnitude content from stockharmdef2
+                    def get_harm_magnitude_content(key):
+                        conn = sqlite3.connect(DB_PATH)
+                        cursor = conn.cursor()
+                        cursor.execute("SELECT \"Harm-Magnitude\" FROM stockharmdef2 WHERE Key = ?", (key,))
+                        result = cursor.fetchone()
+                        conn.close()
+                        if result:
+                            return result[0]
+                        return "Not found"
+
+                    # Display the integer from the "Harm_Magnitude" column in the "stockracialharm" table
+                    harm_magnitude_key = row['Harm_Magnitude']
+                    st.markdown(f"<p style='font-size: 24px; font-weight: bold; text-align: center;'>{harm_magnitude_key}</p>", unsafe_allow_html=True)
+
+                    # Get and display the content from the "Harm-Magnitude" column in the stockharmdef2 table
+                    harm_magnitude_content = get_harm_magnitude_content(harm_magnitude_key)
                     
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.markdown(f"<h3 style='text-align: center;'>Harm Magnitude</h3>", unsafe_allow_html=True)
-                        st.markdown(f"<p style='font-size: 24px; font-weight: bold; text-align: center;'>{row['Harm_Magnitude']}</p>", unsafe_allow_html=True)
-                        st.markdown(f"<h3 style='text-align: center;'>Population Impact</h3>", unsafe_allow_html=True)
-                        st.markdown(f"<p style='font-size: 24px; font-weight: bold; text-align: center;'>{row['Population_Impact']}</p>", unsafe_allow_html=True)
-                    with col2:
-                        st.markdown(f"<h3 style='text-align: center;'>Directional Movement</h3>", unsafe_allow_html=True)
-                        st.markdown(f"<p style='font-size: 24px; font-weight: bold; text-align: center;'>{row['Directional_Movement']}</p>", unsafe_allow_html=True)
-                        st.markdown(f"<h3 style='text-align: center;'>Total Score</h3>", unsafe_allow_html=True)
-                        st.markdown(f"<p style='font-size: 24px; font-weight: bold; text-align: center;'>{row['Total_Score']}</p>", unsafe_allow_html=True)
+                    with st.expander("See explanation"):
+                        st.write(harm_magnitude_content)
+
+
+                    st.markdown(f"<h3 style='text-align: center;'>Population Impact</h3>", unsafe_allow_html=True)
+
+                    # Function to get Population Impact content from stockharmdef2
+                    def get_pop_impact_content(key):
+                        conn = sqlite3.connect(DB_PATH)
+                        cursor = conn.cursor()
+                        cursor.execute("SELECT \"Pop-Impact\" FROM stockharmdef2 WHERE Key = ?", (key,))
+                        result = cursor.fetchone()
+                        conn.close()
+                        if result:
+                            return result[0]
+                        return "Not found"
+
+                    # Display the integer from the "Pop-Impact" column in the "stockracialharm" table
+                    pop_impact_key = row['Population_Impact']
+                    st.markdown(f"<p style='font-size: 24px; font-weight: bold; text-align: center;'>{pop_impact_key}</p>", unsafe_allow_html=True)
+
+                    # Get and display the content from the "Harm-Magnitude" column in the stockharmdef2 table
+                    pop_impact_content = get_pop_impact_content(pop_impact_key)
+                    
+                    with st.expander("See explanation"):
+                        st.write(pop_impact_content)    
+
+
+                    st.markdown(f"<h3 style='text-align: center;'>Directional Movement</h3>", unsafe_allow_html=True)
+                    
+                    # Function to get Directional Movement content from stockharmdef2
+                    def get_directional_trend_content(key):
+                        conn = sqlite3.connect(DB_PATH)
+                        cursor = conn.cursor()
+                        cursor.execute("SELECT \"Directional-Trend\" FROM stockharmdef2 WHERE Key = ?", (key,))
+                        result = cursor.fetchone()
+                        conn.close()
+                        if result:
+                            return result[0]
+                        return "Not found"
+
+                    # Display the integer from the "Directional Impact" column in the "stockracialharm" table
+                    directional_movement_key = row['Directional_Movement']
+                    st.markdown(f"<p style='font-size: 24px; font-weight: bold; text-align: center;'>{directional_movement_key}</p>", unsafe_allow_html=True)
+
+                    # Get and display the content from the "Harm-Magnitude" column in the stockharmdef2 table
+                    directional_movement_content = get_directional_trend_content(directional_movement_key)
+                    
+                    with st.expander("See explanation"):
+                        st.write(directional_movement_content)  
+                    
+                    
+
+                    st.markdown(f"<h3 style='text-align: center;'>Total Score</h3>", unsafe_allow_html=True)
+                    st.markdown(f"<p style='font-size: 24px; font-weight: bold; text-align: center;'>{row['Normalized_Score_2']}</p>", unsafe_allow_html=True)
+                    with st.expander("See explanation"):
+                        st.write('''
+                            This score corresponds with the second lowest quintile of recorded scores and indicates a "strong" profile of racial harm present in typical industry lifecycle activities.
+                        ''')
 
         st.divider()
 
@@ -285,10 +365,30 @@ if submit_button:
 
         with st.expander("Key Citations"):
             st.write('''
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
+                https://www.worldbank.org/en/topic/trade/publication/global-value-chain-development-report-2019
             ''')
+
+        st.divider()
+
+        # As You Sow Sector Insights
+        st.subheader("As You Sow Sector Insights")
+        if sector_search:
+            asyousow_data = get_asyousow_data(sector_search)
+    
+            if not asyousow_data.empty:
+                st.write(f"Insights for sector: {sector_search}")
+                st.dataframe(asyousow_data, use_container_width=True)  # Modified 
+            else:
+                st.info(f"No As You Sow data found for the sector: {sector_search}")
+        else:
+            st.info("Please select an industry sector to see As You Sow insights.")
+
+        # Add a line space
+        st.markdown("<br>", unsafe_allow_html=True)
+        # Add a line space
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        st.divider()
 
         def get_future_est_time():
             # Get current time in EST
@@ -319,8 +419,11 @@ if submit_button:
         )
         # Add a line space
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
 
          # Display the time
         st.markdown(f"<i>The last update to report data generated at: <b>{future_time}</b></i>", unsafe_allow_html=True)
+
+        with st.expander("Informational Disclaimer"):
+            st.write('''
+                Reparations Finance Lab and Scatterday & Associates expressly disclaim any liability for financial losses or damages resulting from the use of data or information provided for decision-making purposes. The data and information presented are intended for informational purposes only and should not be construed as financial, investment, or professional advice. Users are advised to conduct their own research and consult with qualified professionals before making any financial or investment decisions. Reparations Finance Lab and Scatterday & Associates make no representations or warranties regarding the accuracy, completeness, or reliability of the data provided. By accessing and using this information, you acknowledge and accept that you do so at your own risk, and that Reparations Finance Lab and Scatterday & Associates shall not be held responsible for any direct, indirect, incidental, consequential, or punitive damages arising from your use of or reliance on the data or information presented.s
+            ''')
